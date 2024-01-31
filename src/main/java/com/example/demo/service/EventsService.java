@@ -7,9 +7,12 @@ import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.PageRequest;
 
 import com.example.demo.dto.EventDTO;
 import com.example.demo.dto.EventUsersDTO;
+import com.example.demo.dto.EventsWithCountDTO;
 import com.example.demo.entity.EventEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.repository.EventsRepo;
@@ -49,8 +52,12 @@ public class EventsService {
         return eventsRepo.save(event);
     }
 
-    public Iterable<EventDTO> getEvents() {
-        return StreamSupport.stream(eventsRepo.findAll().spliterator(), false)
+    public Iterable<EventDTO> getEvents(
+        @RequestParam(name="page", defaultValue = "0") Integer page,
+        @RequestParam(name="limit", defaultValue = "5") Integer limit
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, limit);
+        return StreamSupport.stream(eventsRepo.findAll(pageRequest).spliterator(), false)
         .map((e) -> {            
             return this.setEventDTO(e);
         }).collect(Collectors.toList());
@@ -83,5 +90,15 @@ public class EventsService {
     public Long deleteEvent(Long id) {
         eventsRepo.deleteById(id);
         return id;
+    }
+
+    public EventsWithCountDTO getEventsWithCount(
+        @RequestParam(name="page", defaultValue = "0") Integer page,
+        @RequestParam(name="limit", defaultValue = "5") Integer limit
+    ) {
+        EventsWithCountDTO eventsWithCount = new EventsWithCountDTO();
+        eventsWithCount.setItems(this.getEvents(page, limit));
+        eventsWithCount.setTotalCount(eventsRepo.count());
+        return eventsWithCount;
     }
 }

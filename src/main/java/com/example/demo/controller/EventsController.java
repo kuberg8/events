@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.EventEntity;
@@ -23,9 +24,12 @@ public class EventsController {
     private EventsService eventService;
 
     @GetMapping
-    public ResponseEntity<Object> getEvents() {
+    public ResponseEntity<Object> getEvents(
+        @RequestParam(name="page", defaultValue = "0") Integer page,
+        @RequestParam(name="limit", defaultValue = "5") Integer limit
+    ) {
         try {
-            return ResponseEntity.ok().body(eventService.getEvents());
+            return ResponseEntity.ok().body(eventService.getEventsWithCount(page, limit));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e);
         }
