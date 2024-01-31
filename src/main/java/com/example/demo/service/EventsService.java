@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import com.example.demo.dto.EventDTO;
 import com.example.demo.dto.EventUsersDTO;
@@ -16,6 +17,7 @@ import com.example.demo.dto.EventsWithCountDTO;
 import com.example.demo.entity.EventEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.repository.EventsRepo;
+
 
 @Service
 public class EventsService {
@@ -54,9 +56,16 @@ public class EventsService {
 
     public Iterable<EventDTO> getEvents(
         @RequestParam(name="page", defaultValue = "0") Integer page,
-        @RequestParam(name="limit", defaultValue = "5") Integer limit
+        @RequestParam(name="limit", defaultValue = "5") Integer limit,
+        @RequestParam(name="sort", defaultValue = "date") String sort,
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
     ) {
-        PageRequest pageRequest = PageRequest.of(page, limit);
+
+        PageRequest pageRequest = PageRequest.of(
+            page, 
+            limit, 
+            Sort.by(sort_type == "asc" ? Sort.Direction.ASC : Sort.Direction.DESC, sort)
+        );
         return StreamSupport.stream(eventsRepo.findAll(pageRequest).spliterator(), false)
         .map((e) -> {            
             return this.setEventDTO(e);
@@ -94,10 +103,12 @@ public class EventsService {
 
     public EventsWithCountDTO getEventsWithCount(
         @RequestParam(name="page", defaultValue = "0") Integer page,
-        @RequestParam(name="limit", defaultValue = "5") Integer limit
+        @RequestParam(name="limit", defaultValue = "5") Integer limit,
+        @RequestParam(name="sort", defaultValue = "date") String sort,
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
     ) {
         EventsWithCountDTO eventsWithCount = new EventsWithCountDTO();
-        eventsWithCount.setItems(this.getEvents(page, limit));
+        eventsWithCount.setItems(this.getEvents(page, limit, sort, sort_type));
         eventsWithCount.setTotalCount(eventsRepo.count());
         return eventsWithCount;
     }

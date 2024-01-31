@@ -26,10 +26,12 @@ public class EventsController {
     @GetMapping
     public ResponseEntity<Object> getEvents(
         @RequestParam(name="page", defaultValue = "0") Integer page,
-        @RequestParam(name="limit", defaultValue = "5") Integer limit
+        @RequestParam(name="limit", defaultValue = "5") Integer limit,
+        @RequestParam(name="sort", defaultValue = "date") String sort,
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
     ) {
         try {
-            return ResponseEntity.ok().body(eventService.getEventsWithCount(page, limit));
+            return ResponseEntity.ok().body(eventService.getEventsWithCount(page, limit, sort, sort_type));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e);
         }
