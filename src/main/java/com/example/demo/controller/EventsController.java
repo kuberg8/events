@@ -28,10 +28,11 @@ public class EventsController {
         @RequestParam(name="page", defaultValue = "0") Integer page,
         @RequestParam(name="limit", defaultValue = "5") Integer limit,
         @RequestParam(name="sort", defaultValue = "date") String sort,
-        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type,
+        @RequestParam(name="city", defaultValue = "") String city
     ) {
         try {
-            return ResponseEntity.ok().body(eventService.getEventsWithCount(page, limit, sort, sort_type));
+            return ResponseEntity.ok().body(eventService.getEventsWithCount(page, limit, sort, sort_type, city));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e);
         }
@@ -59,10 +60,10 @@ public class EventsController {
     }
 
     @PostMapping
-    public ResponseEntity<String> postEvent(@RequestBody EventEntity event) {
+    public ResponseEntity<Object> postEvent(@RequestBody EventEntity event) {
         try {
-            eventService.createEvent(event);
-            return ResponseEntity.ok().body("Событие создано");
+            EventEntity newEvent = eventService.createEvent(event);
+            return ResponseEntity.ok().body(newEvent);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Произошла ошибка");
         }

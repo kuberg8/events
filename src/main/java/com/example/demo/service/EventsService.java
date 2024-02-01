@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -58,15 +59,23 @@ public class EventsService {
         @RequestParam(name="page", defaultValue = "0") Integer page,
         @RequestParam(name="limit", defaultValue = "5") Integer limit,
         @RequestParam(name="sort", defaultValue = "date") String sort,
-        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type,
+        @RequestParam(name="city", defaultValue = "") String city
     ) {
-
         PageRequest pageRequest = PageRequest.of(
             page, 
             limit, 
-            Sort.by(sort_type == "asc" ? Sort.Direction.ASC : Sort.Direction.DESC, sort)
+            Sort.by(sort_type.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sort)
         );
-        return StreamSupport.stream(eventsRepo.findAll(pageRequest).spliterator(), false)
+
+        Page<EventEntity> events;
+        if (city.isEmpty()) {
+            events = eventsRepo.findAll(pageRequest);
+        } else {
+            events = eventsRepo.findByCityLike(city, pageRequest);
+        }
+
+        return StreamSupport.stream(events.spliterator(), false)
         .map((e) -> {            
             return this.setEventDTO(e);
         }).collect(Collectors.toList());
@@ -105,10 +114,11 @@ public class EventsService {
         @RequestParam(name="page", defaultValue = "0") Integer page,
         @RequestParam(name="limit", defaultValue = "5") Integer limit,
         @RequestParam(name="sort", defaultValue = "date") String sort,
-        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type
+        @RequestParam(name="sort_type", defaultValue = "asc") String sort_type,
+        @RequestParam(name="city", defaultValue = "") String city
     ) {
         EventsWithCountDTO eventsWithCount = new EventsWithCountDTO();
-        eventsWithCount.setItems(this.getEvents(page, limit, sort, sort_type));
+        eventsWithCount.setItems(this.getEvents(page, limit, sort, sort_type, city));
         eventsWithCount.setTotalCount(eventsRepo.count());
         return eventsWithCount;
     }
