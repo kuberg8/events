@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,8 +63,21 @@ public class EventsController {
     @PostMapping
     public ResponseEntity<Object> postEvent(@RequestBody EventEntity event) {
         try {
-            EventEntity newEvent = eventService.createEvent(event);
-            return ResponseEntity.ok().body(newEvent);
+            return ResponseEntity.ok().body(eventService.createEvent(event));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Произошла ошибка");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> putEvent(
+        @PathVariable(value="id") String id, 
+        @RequestBody EventEntity event
+    ) {
+        try {
+            Long event_id = Long.parseLong(id);
+            eventService.updateEvent(event_id, event);
+            return ResponseEntity.ok().body("Событие успешно обновлено");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Произошла ошибка");
         }

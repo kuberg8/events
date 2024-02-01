@@ -122,4 +122,20 @@ public class EventsService {
         eventsWithCount.setTotalCount(eventsRepo.count());
         return eventsWithCount;
     }
+
+    public EventEntity updateEvent(Long event_id, EventEntity event) {
+        EventEntity eventEntity = eventsRepo.findById(event_id).get();
+        eventEntity.setDate(event.getDate());
+        eventEntity.setTime(event.getTime());
+        eventEntity.setCity(event.getCity());
+        eventEntity.setConfirmation(event.getConfirmation());
+        eventEntity.setInventory(event.getInventory());
+        eventEntity.setIsPrivate(event.getIsPrivate());
+        eventEntity.setLevel(event.getLevel());
+        eventEntity.setMinAge(event.getMinAge());
+        eventEntity.setMaxAge(event.getMaxAge());
+        eventEntity.setPlace(event.getPlace());
+
+        return eventsRepo.save(eventEntity);
+    }
 }
